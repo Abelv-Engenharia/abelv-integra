@@ -1,7 +1,10 @@
-import { Calendar, Clock } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Clock, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useFeriasUsuario } from "@/hooks/gestao-pessoas/useFeriasUsuario";
+import { VisualizarFeriasModal } from "./VisualizarFeriasModal";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -21,8 +24,21 @@ const getStatusBadge = (status: string) => {
 
 export function HistoricoFeriasCard() {
   const { data: historico = [], isLoading } = useFeriasUsuario();
+  const [modalAberto, setModalAberto] = useState(false);
+  const [feriasSelecionada, setFeriasSelecionada] = useState<any>(null);
+
+  const handleVisualizar = (ferias: any) => {
+    setFeriasSelecionada(ferias);
+    setModalAberto(true);
+  };
+
+  const handleFecharModal = () => {
+    setModalAberto(false);
+    setFeriasSelecionada(null);
+  };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -55,6 +71,14 @@ export function HistoricoFeriasCard() {
                       {ferias.cca_codigo} - {ferias.cca_nome}
                     </p>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleVisualizar(ferias)}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Visualizar
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
@@ -86,6 +110,12 @@ export function HistoricoFeriasCard() {
           </div>
         )}
       </CardContent>
+      <VisualizarFeriasModal
+        aberto={modalAberto}
+        onFechar={handleFecharModal}
+        ferias={feriasSelecionada}
+      />
     </Card>
+    </>
   );
 }

@@ -15,6 +15,9 @@ export interface FeriasHistorico {
   observacoes: string | null;
   status: string;
   created_at: string;
+  justificativareprovacao?: string | null;
+  aprovadopor_gestor?: string | null;
+  dataaprovacao_gestor?: string | null;
 }
 
 export const useFeriasUsuario = () => {
@@ -39,7 +42,10 @@ export const useFeriasUsuario = () => {
           responsaveldireto,
           observacoes,
           status,
-          created_at
+          created_at,
+          justificativareprovacao,
+          aprovadopor_gestor,
+          dataaprovacao_gestor
         `)
         .eq('created_by', user.id)
         .eq('ativo', true)

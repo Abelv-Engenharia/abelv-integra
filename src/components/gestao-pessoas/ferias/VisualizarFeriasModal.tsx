@@ -1,250 +1,157 @@
-import { Calendar, User, Building, Clock, FileText, CheckCircle, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, User, Building2, Clock, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FeriasStatusBadge } from "./FeriasStatusBadge";
-import { ControleFérias, StatusFerias } from "@/types/gestao-pessoas/ferias";
+
+interface FeriasDetalhes {
+  id: string;
+  nomeprestador: string;
+  empresa: string;
+  funcaocargo: string;
+  cca_codigo: string;
+  cca_nome: string;
+  datainicioferias: string;
+  diasferias: number;
+  responsaveldireto: string;
+  observacoes: string | null;
+  status: string;
+  created_at: string;
+  justificativareprovacao?: string | null;
+  aprovadopor_gestor?: string | null;
+  dataaprovacao_gestor?: string | null;
+}
 
 interface VisualizarFeriasModalProps {
   aberto: boolean;
-  ferias: ControleFérias;
   onFechar: () => void;
+  ferias: FeriasDetalhes | null;
 }
 
-export function VisualizarFeriasModal({ aberto, ferias, onFechar }: VisualizarFeriasModalProps) {
-  const calcularDiasRestantes = () => {
-    const hoje = new Date();
-    const inicio = new Date(ferias.dataInicioFerias);
-    const diferenca = Math.ceil((inicio.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
-    return diferenca;
+const getStatusBadge = (status: string) => {
+  const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    solicitado: { label: "Aguardando Gestor", variant: "secondary" },
+    aguardando_aprovacao: { label: "Aguardando RH", variant: "outline" },
+    aprovado: { label: "Aprovado", variant: "default" },
+    em_ferias: { label: "Em Férias", variant: "default" },
+    concluido: { label: "Concluído", variant: "outline" },
+    reprovado: { label: "Reprovado", variant: "destructive" }
   };
 
-  const diasRestantes = calcularDiasRestantes();
+  const statusInfo = statusMap[status] || { label: status, variant: "outline" };
+  return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+};
+
+export function VisualizarFeriasModal({ aberto, onFechar, ferias }: VisualizarFeriasModalProps) {
+  if (!ferias) return null;
 
   return (
     <Dialog open={aberto} onOpenChange={onFechar}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Férias — {ferias.nomePrestador} — {ferias.obraLocalAtuacao}
+            Detalhes da Solicitação de Férias
           </DialogTitle>
+          <DialogDescription>
+            Informações completas da solicitação
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Status e Alertas */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <FeriasStatusBadge status={ferias.status} />
-              {diasRestantes > 0 && diasRestantes <= 15 && (
-                <Badge variant="secondary">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Inicia em {diasRestantes} dias
-                </Badge>
-              )}
-              {diasRestantes === 0 && (
-                <Badge variant="default">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Inicia hoje
-                </Badge>
-              )}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Status:</span>
+            {getStatusBadge(ferias.status)}
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Prestador</p>
+                <p className="font-medium">{ferias.nomeprestador}</p>
+                <p className="text-sm text-muted-foreground">{ferias.funcaocargo}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Empresa e CCA</p>
+                <p className="font-medium">{ferias.empresa}</p>
+                <p className="text-sm text-muted-foreground">
+                  {ferias.cca_codigo} - {ferias.cca_nome}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Período de Férias</p>
+                <p className="font-medium">
+                  Início: {format(new Date(ferias.datainicioferias), "dd/MM/yyyy", { locale: ptBR })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {ferias.diasferias} {ferias.diasferias === 1 ? 'dia' : 'dias'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Responsável Direto</p>
+                <p className="font-medium">{ferias.responsaveldireto}</p>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Informações do Prestador */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Informações do Prestador
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Nome</p>
-                  <p className="font-medium">{ferias.nomePrestador}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Empresa</p>
-                  <p>{ferias.empresa}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Função / Cargo</p>
-                  <p>{ferias.funcaoCargo}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Obra / Local</p>
-                  <p>{ferias.obraLocalAtuacao}</p>
-                </div>
-              </CardContent>
-            </Card>
+          {ferias.observacoes && (
+            <>
+              <Separator />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">Observações</p>
+                <p className="text-sm">{ferias.observacoes}</p>
+              </div>
+            </>
+          )}
 
-            {/* Informações das Férias */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Detalhes das Férias
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Data de Início das Férias</p>
-                  <p className="font-medium">
-                    {format(ferias.dataInicioFerias, "dd/MM/yyyy", { locale: ptBR })}
+          {ferias.status === 'reprovado' && ferias.justificativareprovacao && (
+            <>
+              <Separator />
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <p className="font-medium">Motivo da Reprovação</p>
+                </div>
+                <p className="text-sm">{ferias.justificativareprovacao}</p>
+                {ferias.aprovadopor_gestor && (
+                  <p className="text-xs text-muted-foreground">
+                    Reprovado por: {ferias.aprovadopor_gestor}
                   </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Dias de Férias</p>
-                  <p className="font-medium">{ferias.diasFerias} dias</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Período Aquisitivo</p>
-                  <p>{ferias.periodoAquisitivo}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Responsáveis */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-4 w-4" />
-                  Responsáveis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Responsável pelo Registro</p>
-                  <p>{ferias.responsavelRegistro}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Responsável Direto</p>
-                  <p>{ferias.responsavelDireto}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Data de Criação</p>
-                  <p>{format(ferias.dataCriacao, "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-                </div>
-                {ferias.dataAprovacao && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Data de Aprovação</p>
-                    <p>{format(ferias.dataAprovacao, "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-                  </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Observações e Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Observações
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {ferias.observacoes ? (
-                  <div>
-                    <p className="text-sm">{ferias.observacoes}</p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">Nenhuma observação registrada</p>
+                {ferias.dataaprovacao_gestor && (
+                  <p className="text-xs text-muted-foreground">
+                    Em: {format(new Date(ferias.dataaprovacao_gestor), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  </p>
                 )}
+              </div>
+            </>
+          )}
 
-                {ferias.justificativaReprovacao && (
-                  <div className="bg-destructive/10 p-3 rounded-lg">
-                    <p className="text-sm font-medium text-destructive flex items-center gap-2">
-                      <XCircle className="h-4 w-4" />
-                      Motivo da Reprovação
-                    </p>
-                    <p className="text-sm mt-1">{ferias.justificativaReprovacao}</p>
-                  </div>
-                )}
+          <Separator />
 
-                {ferias.anexos && ferias.anexos.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Anexos</p>
-                    <div className="space-y-2">
-                      {ferias.anexos.map((anexo, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <FileText className="h-4 w-4" />
-                          <span>{anexo}</span>
-                          <Button variant="ghost" size="sm">
-                            Baixar
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>
+              Solicitado em {format(new Date(ferias.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+            </span>
           </div>
-
-          {/* Timeline de Status (se houver histórico) */}
-          {ferias.historicoStatus && ferias.historicoStatus.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Status</CardTitle>
-                <CardDescription>Timeline de mudanças de status das férias</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {ferias.historicoStatus.map((item, index) => (
-                    <div key={index} className="flex gap-3">
-                      <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <FeriasStatusBadge status={item.status} />
-                          <span className="text-sm text-muted-foreground">
-                            {format(item.data, "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Por: {item.usuario}</p>
-                        {item.observacao && (
-                          <p className="text-sm">{item.observacao}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Ações de Aprovação */}
-          {ferias.status === StatusFerias.AGUARDANDO_APROVACAO && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações de Aprovação</CardTitle>
-                <CardDescription>Aprovar ou reprovar esta solicitação de férias</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3">
-                  <Button>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Aprovar
-                  </Button>
-                  <Button variant="destructive">
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reprovar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
-
-        <DialogFooter>
-          <Button onClick={onFechar}>Fechar</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
