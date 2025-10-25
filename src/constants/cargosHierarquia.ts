@@ -13,6 +13,7 @@ export const HIERARQUIA_CARGOS: Record<string, number> = {
   // Técnicos
   "Técnico de Segurança do Trabalho": CargoHierarquia.TECNICO,
   "Técnica de Segurança do Trabalho": CargoHierarquia.TECNICO,
+  "Assistente de Segurança do Trabalho": CargoHierarquia.TECNICO,
   
   // Analistas
   "Analista de Departamento Pessoal": CargoHierarquia.ANALISTA,
@@ -25,16 +26,28 @@ export const HIERARQUIA_CARGOS: Record<string, number> = {
   
   // Coordenadores
   "Coordenador de SMS": CargoHierarquia.COORDENADOR,
+  "Coordenadora Administrativa": CargoHierarquia.COORDENADOR,
+  "Coordenador de Orçamentos": CargoHierarquia.COORDENADOR,
   "Engenheiro de Segurança do Trabalho": CargoHierarquia.COORDENADOR,
+  "Engenheiro Residente": CargoHierarquia.COORDENADOR,
+  "SMS": CargoHierarquia.COORDENADOR,
   
   // Gerentes
   "Gerente": CargoHierarquia.GERENTE,
+  "Gerente de Gestão de Pessoas": CargoHierarquia.GERENTE,
+  "Gerente de Contratos": CargoHierarquia.GERENTE,
+  "Gerente de Projeto": CargoHierarquia.GERENTE,
+  "Gerente de Projetos": CargoHierarquia.GERENTE,
+  "Gerente de Projetos - PMO": CargoHierarquia.GERENTE,
   
   // Superintendentes
   "Superintendente": CargoHierarquia.SUPERINTENDENTE,
+  "Superintendente de Obras": CargoHierarquia.SUPERINTENDENTE,
   
   // Diretores
   "Diretor": CargoHierarquia.DIRETOR,
+  "Diretor Executivo": CargoHierarquia.DIRETOR,
+  "Diretor Operacional": CargoHierarquia.DIRETOR,
 };
 
 export function getNivelHierarquico(cargo: string): number {
