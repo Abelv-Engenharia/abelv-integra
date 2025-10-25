@@ -161,7 +161,7 @@ export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps)
       statusaprovacao: "Aprovado",
       observacoesaprovacao: formValues.observacoesaprovacao,
       status: "Aprovado",
-      aprovadopor: user?.email || "Usuário Atual",
+      aprovadopor: user?.id,
       dataaprovacao: new Date().toISOString(),
     }, {
       onSuccess: () => {
