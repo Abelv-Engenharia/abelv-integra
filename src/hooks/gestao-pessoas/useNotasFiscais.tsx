@@ -266,6 +266,21 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
     }
   };
 
+  // Mapear statusaprovacao do banco para o formato do frontend
+  const mapStatusAprovacao = (dbStatus: string): "Pendente" | "Aprovado" | "Reprovado" | undefined => {
+    if (!dbStatus) return undefined;
+    switch (dbStatus.toLowerCase()) {
+      case 'pendente':
+        return 'Pendente';
+      case 'aprovado':
+        return 'Aprovado';
+      case 'reprovado':
+        return 'Reprovado';
+      default:
+        return undefined;
+    }
+  };
+
   return {
     id: data.id,
     numero: data.numero,
@@ -284,7 +299,7 @@ function mapNotaFiscalFromDB(data: any): NotaFiscal {
     numerocredor: data.numerocredor,
     datavencimento: data.datavencimento,
     planofinanceiro: data.planofinanceiro,
-    statusaprovacao: data.statusaprovacao,
+    statusaprovacao: mapStatusAprovacao(data.statusaprovacao),
     observacoesaprovacao: data.observacoesaprovacao,
     status: mapStatus(data.status),
     dataenviosienge: data.dataenviosienge,
@@ -315,6 +330,20 @@ function mapNotaFiscalToDB(data: any): any {
     }
   };
 
+  // Mapear statusaprovacao para o formato do banco
+  const mapStatusAprovacaoToDB = (frontendStatus: string): string => {
+    switch (frontendStatus) {
+      case 'Pendente':
+        return 'pendente';
+      case 'Aprovado':
+        return 'aprovado';
+      case 'Reprovado':
+        return 'reprovado';
+      default:
+        return frontendStatus.toLowerCase();
+    }
+  };
+
   return {
     numero: data.numero,
     nomeempresa: data.nomeempresa,
@@ -325,7 +354,7 @@ function mapNotaFiscalToDB(data: any): any {
     descricaoservico: data.descricaoservico,
     valor: data.valor,
     status: data.status ? mapStatusToDB(data.status) : undefined,
-    statusaprovacao: data.statusaprovacao,
+    statusaprovacao: data.statusaprovacao ? mapStatusAprovacaoToDB(data.statusaprovacao) : undefined,
     aprovadopor: data.aprovadopor,
     dataaprovacao: data.dataaprovacao,
     observacoesaprovacao: data.observacoesaprovacao,
