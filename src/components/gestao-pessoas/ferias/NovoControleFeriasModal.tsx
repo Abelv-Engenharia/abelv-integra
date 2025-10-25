@@ -17,6 +17,8 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useUsuarioPrestador } from "@/hooks/gestao-pessoas/useUsuarioPrestador";
 import { useResponsaveisSuperiores } from "@/hooks/gestao-pessoas/useResponsaveisSuperiores";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const feriasSchema = z.object({
   nomeEmpresa: z.string().min(1, "Nome da empresa é obrigatório"),
@@ -80,14 +82,115 @@ export function NovoControleFeriasModal({
     }
   }, [prestadorData, aberto, form]);
 
-  const onSubmit = (data: FeriasFormData) => {
-    console.log("Dados das férias:", data);
-    toast({
-      title: "Férias solicitadas",
-      description: `Solicitação de férias para ${data.nomeRepresentante} foi registrada com sucesso.`
-    });
-    form.reset();
-    onFechar();
+  const { user } = useAuth();
+
+  const onSubmit = async (data: FeriasFormData) => {
+    if (!user || !prestadorData) {
+      toast({
+        title: "Erro",
+        description: "Erro ao identificar usuário",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Buscar informações completas do responsável direto
+      const { data: responsavelData, error: responsavelError } = await supabase
+        .from('profiles')
+        .select('nome')
+        .eq('id', data.responsavelDireto)
+        .single();
+
+      if (responsavelError) {
+        console.error('Erro ao buscar responsável:', responsavelError);
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar informações do responsável",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Buscar informações completas do usuário que está registrando
+      const { data: registradorData, error: registradorError } = await supabase
+        .from('profiles')
+        .select('nome')
+        .eq('id', user.id)
+        .single();
+
+      if (registradorError) {
+        console.error('Erro ao buscar registrador:', registradorError);
+        toast({
+          title: "Erro",
+          description: "Erro ao buscar informações do usuário",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Buscar CCA completo
+      const ccaInfo = prestadorData.ccasPermitidas.find(c => c.id === ccaId);
+      
+      if (!ccaInfo) {
+        toast({
+          title: "Erro",
+          description: "CCA não encontrado",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Montar objeto para inserção
+      const feriasData = {
+        prestador_pj_id: prestadorData.prestadorPjId,
+        nomeprestador: data.nomeRepresentante,
+        empresa: data.nomeEmpresa,
+        funcaocargo: data.funcao,
+        cca_id: ccaInfo.id,
+        cca_codigo: ccaInfo.codigo,
+        cca_nome: ccaInfo.nome,
+        datainicioferias: format(data.dataInicioFerias, 'yyyy-MM-dd'),
+        periodoaquisitivo: 'N/A',
+        diasferias: data.diasFerias,
+        responsavelregistro: registradorData.nome,
+        responsavelregistro_id: user.id,
+        responsaveldireto: responsavelData.nome,
+        responsaveldireto_id: data.responsavelDireto,
+        observacoes: data.observacoes || null,
+        status: 'solicitado',
+        ativo: true,
+        created_by: user.id
+      };
+
+      const { error: insertError } = await supabase
+        .from('prestadores_ferias')
+        .insert(feriasData);
+
+      if (insertError) {
+        console.error('Erro ao salvar férias:', insertError);
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar solicitação de férias",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Solicitação de férias registrada com sucesso!"
+      });
+      form.reset();
+      onFechar();
+    } catch (error) {
+      console.error('Erro inesperado:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao salvar férias",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
