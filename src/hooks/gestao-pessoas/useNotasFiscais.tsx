@@ -246,13 +246,6 @@ export function useDeleteNotaFiscal() {
 }
 
 function mapNotaFiscalFromDB(data: any): NotaFiscal {
-  console.log('Mapeando NF:', {
-    id: data.id,
-    cca_codigo: data.cca_codigo,
-    cca_nome: data.cca_nome,
-    cca_resultado: data.cca_codigo && data.cca_nome ? `${data.cca_codigo} - ${data.cca_nome}` : (data.cca_nome || "")
-  });
-  
   return {
     id: data.id,
     numero: data.numero,
