@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { useCredores } from "@/hooks/useCredores";
 
 interface EditarNFModalProps {
   open: boolean;
@@ -57,6 +58,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFModalProps) {
+  const { data: credores } = useCredores();
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,7 +67,7 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       nomeempresa: notaFiscal?.nomeempresa || "",
       nomerepresentante: notaFiscal?.nomerepresentante || "",
       periodocontabil: notaFiscal?.periodocontabil || "",
-      dataemissao: notaFiscal?.dataemissao ? new Date(notaFiscal.dataemissao) : undefined,
+      dataemissao: notaFiscal?.dataemissao ? new Date(notaFiscal.dataemissao + 'T00:00:00') : undefined,
       descricaoservico: notaFiscal?.descricaoservico || "",
       valor: notaFiscal?.valor || 0,
       
@@ -72,9 +75,9 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       tipodocumento: notaFiscal?.tipodocumento || "NFSE",
       empresadestino: notaFiscal?.empresadestino || "Abelv Engenharia",
       numerocredor: notaFiscal?.numerocredor || "",
-      datavencimento: notaFiscal?.datavencimento ? new Date(notaFiscal.datavencimento) : undefined,
+      datavencimento: notaFiscal?.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
       cca: notaFiscal?.cca || "",
-      planofinanceiro: notaFiscal?.planofinanceiro || "",
+      planofinanceiro: notaFiscal?.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
       statusaprovacao: notaFiscal?.statusaprovacao || "Pendente",
       observacoesaprovacao: notaFiscal?.observacoesaprovacao || "",
     },
@@ -83,24 +86,30 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
   // Atualiza os valores do formulário quando o modal abre ou a NF muda
   useEffect(() => {
     if (open && notaFiscal) {
+      // Buscar credor baseado no nome do representante
+      const credor = credores?.find(c => 
+        c.razao.toLowerCase().includes(notaFiscal.nomerepresentante.toLowerCase()) ||
+        c.fantasia?.toLowerCase().includes(notaFiscal.nomerepresentante.toLowerCase())
+      );
+
       form.reset({
         nomeempresa: notaFiscal.nomeempresa,
         nomerepresentante: notaFiscal.nomerepresentante,
         periodocontabil: notaFiscal.periodocontabil,
-        dataemissao: new Date(notaFiscal.dataemissao),
+        dataemissao: new Date(notaFiscal.dataemissao + 'T00:00:00'),
         descricaoservico: notaFiscal.descricaoservico,
         valor: notaFiscal.valor,
         tipodocumento: notaFiscal.tipodocumento || "NFSE",
         empresadestino: notaFiscal.empresadestino || "Abelv Engenharia",
-        numerocredor: notaFiscal.numerocredor || "",
-        datavencimento: notaFiscal.datavencimento ? new Date(notaFiscal.datavencimento) : undefined,
+        numerocredor: notaFiscal.numerocredor || credor?.id_sienge || "",
+        datavencimento: notaFiscal.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
         cca: notaFiscal.cca || "",
-        planofinanceiro: notaFiscal.planofinanceiro || "",
+        planofinanceiro: notaFiscal.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
         statusaprovacao: notaFiscal.statusaprovacao || "Pendente",
         observacoesaprovacao: notaFiscal.observacoesaprovacao || "",
       });
     }
-  }, [open, notaFiscal, form]);
+  }, [open, notaFiscal, form, credores]);
 
   if (!notaFiscal) return null;
 
@@ -287,15 +296,17 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Valor *
+                        Valor NF *
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          value={formatarValor(field.value)}
+                          onChange={(e) => {
+                            const valor = e.target.value.replace(/\D/g, '');
+                            field.onChange(parseFloat(valor) / 100 || 0);
+                          }}
+                          placeholder="R$ 0,00"
                           className={!field.value ? "border-destructive" : ""}
                         />
                       </FormControl>
@@ -480,14 +491,15 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
                   name="planofinanceiro"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
+                      <FormLabel>
                         Plano Financeiro *
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="Ex: PF-001"
-                          className={!field.value ? "border-destructive" : ""}
+                          value="2.02.01.21 - Salários / Remunerações - PJ"
+                          disabled
+                          className="bg-muted"
                         />
                       </FormControl>
                       <FormMessage />
