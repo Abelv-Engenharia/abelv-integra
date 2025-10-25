@@ -18,7 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { useCredores } from "@/hooks/useCredores";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EditarNFModalProps {
   open: boolean;
@@ -58,8 +58,6 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFModalProps) {
-  const { data: credores } = useCredores();
-  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -85,31 +83,54 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
 
   // Atualiza os valores do formulário quando o modal abre ou a NF muda
   useEffect(() => {
-    if (open && notaFiscal) {
-      // Buscar credor baseado no nome do representante
-      const credor = credores?.find(c => 
-        c.razao.toLowerCase().includes(notaFiscal.nomerepresentante.toLowerCase()) ||
-        c.fantasia?.toLowerCase().includes(notaFiscal.nomerepresentante.toLowerCase())
-      );
+    const buscarNumeroCredor = async () => {
+      if (open && notaFiscal) {
+        let numeroCredor = notaFiscal.numerocredor || "";
 
-      form.reset({
-        nomeempresa: notaFiscal.nomeempresa,
-        nomerepresentante: notaFiscal.nomerepresentante,
-        periodocontabil: notaFiscal.periodocontabil,
-        dataemissao: new Date(notaFiscal.dataemissao + 'T00:00:00'),
-        descricaoservico: notaFiscal.descricaoservico,
-        valor: notaFiscal.valor,
-        tipodocumento: notaFiscal.tipodocumento || "NFSE",
-        empresadestino: notaFiscal.empresadestino || "Abelv Engenharia",
-        numerocredor: notaFiscal.numerocredor || credor?.id_sienge || "",
-        datavencimento: notaFiscal.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
-        cca: notaFiscal.cca || "",
-        planofinanceiro: notaFiscal.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
-        statusaprovacao: notaFiscal.statusaprovacao || "Pendente",
-        observacoesaprovacao: notaFiscal.observacoesaprovacao || "",
-      });
-    }
-  }, [open, notaFiscal, form, credores]);
+        // Buscar o prestador PJ pelo ID da nota fiscal para pegar o numerocredor
+        try {
+          const { data: nfData } = await supabase
+            .from("prestadores_notas_fiscais")
+            .select("prestador_pj_id")
+            .eq("id", notaFiscal.id)
+            .single();
+
+          if (nfData?.prestador_pj_id) {
+            const { data: prestadorData } = await supabase
+              .from("prestadores_pj")
+              .select("numerocredorsienge")
+              .eq("id", nfData.prestador_pj_id)
+              .single();
+
+            if (prestadorData?.numerocredorsienge) {
+              numeroCredor = prestadorData.numerocredorsienge;
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao buscar número do credor:", error);
+        }
+
+        form.reset({
+          nomeempresa: notaFiscal.nomeempresa,
+          nomerepresentante: notaFiscal.nomerepresentante,
+          periodocontabil: notaFiscal.periodocontabil,
+          dataemissao: new Date(notaFiscal.dataemissao + 'T00:00:00'),
+          descricaoservico: notaFiscal.descricaoservico,
+          valor: notaFiscal.valor,
+          tipodocumento: notaFiscal.tipodocumento || "NFSE",
+          empresadestino: notaFiscal.empresadestino || "Abelv Engenharia",
+          numerocredor: numeroCredor,
+          datavencimento: notaFiscal.datavencimento ? new Date(notaFiscal.datavencimento + 'T00:00:00') : undefined,
+          cca: notaFiscal.cca || "",
+          planofinanceiro: notaFiscal.planofinanceiro || "2.02.01.21 - Salários / Remunerações - PJ",
+          statusaprovacao: notaFiscal.statusaprovacao || "Pendente",
+          observacoesaprovacao: notaFiscal.observacoesaprovacao || "",
+        });
+      }
+    };
+
+    buscarNumeroCredor();
+  }, [open, notaFiscal, form]);
 
   if (!notaFiscal) return null;
 
