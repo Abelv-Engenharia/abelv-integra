@@ -243,6 +243,10 @@ const CadastroEmissaoNF = () => {
     setEditarModalOpen(true);
   };
 
+  const podeEditar = (status: NotaFiscal["status"]) => {
+    return status === "Aguardando Aprovação" || status === "Reprovado";
+  };
+
   const exportarParaExcel = () => {
     const dados = nfsFiltradas.map(nf => ({
       "Número NF": nf.numero,
@@ -585,7 +589,12 @@ const CadastroEmissaoNF = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditar(nf)}
-                              title="Editar"
+                              disabled={!podeEditar(nf.status)}
+                              title={
+                                podeEditar(nf.status)
+                                  ? "Editar"
+                                  : "Não é possível editar NF com este status"
+                              }
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -608,11 +617,12 @@ const CadastroEmissaoNF = () => {
           notaFiscal={nfSelecionada}
         />
 
-        <EditarNFModal
-          open={editarModalOpen}
-          onClose={() => setEditarModalOpen(false)}
-          notaFiscal={nfSelecionada}
-        />
+      <EditarNFModal
+        open={editarModalOpen}
+        onClose={() => setEditarModalOpen(false)}
+        notaFiscal={nfSelecionada}
+        modo="emissao"
+      />
       </div>;
 };
 export default CadastroEmissaoNF;

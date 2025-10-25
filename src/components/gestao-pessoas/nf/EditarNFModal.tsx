@@ -25,6 +25,7 @@ interface EditarNFModalProps {
   open: boolean;
   onClose: () => void;
   notaFiscal: NotaFiscal | null;
+  modo?: 'emissao' | 'aprovacao';
 }
 
 const formSchema = z.object({
@@ -54,7 +55,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps) {
+export function EditarNFModal({ open, onClose, notaFiscal, modo = 'aprovacao' }: EditarNFModalProps) {
   const updateMutation = useUpdateNotaFiscal();
   
   const form = useForm<FormData>({
@@ -207,6 +208,57 @@ export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps)
     });
   };
 
+  const handleSalvarEdicao = async () => {
+    // Validar apenas campos de emissão
+    const isValid = await form.trigger([
+      'nomeempresa',
+      'nomerepresentante',
+      'periodocontabil',
+      'dataemissao',
+      'descricaoservico',
+      'valor'
+    ]);
+
+    if (!isValid) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    const formValues = form.getValues();
+    
+    // Se estava reprovada, voltar para aguardando aprovação
+    const novoStatus = notaFiscal.status === "Reprovado" 
+      ? "Aguardando Aprovação" 
+      : notaFiscal.status;
+    
+    updateMutation.mutate({
+      id: notaFiscal.id,
+      nomeempresa: formValues.nomeempresa,
+      nomerepresentante: formValues.nomerepresentante,
+      periodocontabil: formValues.periodocontabil,
+      dataemissao: formValues.dataemissao.toISOString().split('T')[0],
+      descricaoservico: formValues.descricaoservico,
+      valor: formValues.valor,
+      status: novoStatus,
+      // Manter campos de aprovação inalterados
+      tipodocumento: notaFiscal.tipodocumento,
+      empresadestino: notaFiscal.empresadestino,
+      numerocredor: notaFiscal.numerocredor,
+      datavencimento: notaFiscal.datavencimento,
+      cca: notaFiscal.cca,
+      planofinanceiro: notaFiscal.planofinanceiro,
+    }, {
+      onSuccess: () => {
+        toast.success(
+          notaFiscal.status === "Reprovado"
+            ? "Nota fiscal reenviada para aprovação"
+            : "Nota fiscal atualizada com sucesso"
+        );
+        onClose();
+      }
+    });
+  };
+
   const handleDownload = () => {
     toast.success("Download iniciado");
   };
@@ -222,7 +274,10 @@ export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar Nota Fiscal - {notaFiscal.numero}</DialogTitle>
+          <DialogTitle>
+            {modo === 'emissao' ? 'Editar Emissão - ' : 'Editar Nota Fiscal - '}
+            {notaFiscal.numero}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -397,180 +452,191 @@ export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps)
               </div>
             </div>
 
-            {/* Dados da Aprovação - Editáveis */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Dados da Aprovação</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="tipodocumento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Tipo de Documento *
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+            {/* Dados da Aprovação - Só visível no modo aprovação */}
+            {modo === 'aprovacao' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Dados da Aprovação</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="tipodocumento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Tipo de Documento *
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className={!field.value ? "border-destructive" : ""}>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="NFSE">NFSE</SelectItem>
+                            <SelectItem value="NFe">NFe</SelectItem>
+                            <SelectItem value="NFS">NFS</SelectItem>
+                            <SelectItem value="Outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="empresadestino"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Empresa *
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className={!field.value ? "border-destructive" : ""}>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Abelv Engenharia">Abelv Engenharia</SelectItem>
+                            <SelectItem value="Outras Empresas">Outras Empresas</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numerocredor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Número de Credor *
+                        </FormLabel>
                         <FormControl>
-                          <SelectTrigger className={!field.value ? "border-destructive" : ""}>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
+                          <Input
+                            {...field}
+                            placeholder="Ex: CR-12345"
+                            className={!field.value ? "border-destructive" : ""}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="NFSE">NFSE</SelectItem>
-                          <SelectItem value="NFe">NFe</SelectItem>
-                          <SelectItem value="NFS">NFS</SelectItem>
-                          <SelectItem value="Outros">Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="empresadestino"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Empresa *
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                  <FormField
+                    control={form.control}
+                    name="datavencimento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          Data de Vencimento *
+                        </FormLabel>
                         <FormControl>
-                          <SelectTrigger className={!field.value ? "border-destructive" : ""}>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
+                          <Input
+                            type="date"
+                            value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                            onChange={(e) => {
+                              const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
+                              field.onChange(date);
+                            }}
+                            min={notaFiscal.dataemissao}
+                            className={!field.value ? "border-destructive" : ""}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Abelv Engenharia">Abelv Engenharia</SelectItem>
-                          <SelectItem value="Outras Empresas">Outras Empresas</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="numerocredor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Número de Credor *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ex: CR-12345"
-                          className={!field.value ? "border-destructive" : ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="cca"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={!field.value ? "text-destructive" : ""}>
+                          CCA *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Ex: CC-001"
+                            className={!field.value ? "border-destructive" : ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="datavencimento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        Data de Vencimento *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                          onChange={(e) => {
-                            const date = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined;
-                            field.onChange(date);
-                          }}
-                          min={notaFiscal.dataemissao}
-                          className={!field.value ? "border-destructive" : ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="planofinanceiro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Plano Financeiro *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value="2.02.01.21 - Salários / Remunerações - PJ"
+                            disabled
+                            className="bg-muted"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="cca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={!field.value ? "text-destructive" : ""}>
-                        CCA *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Ex: CC-001"
-                          className={!field.value ? "border-destructive" : ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="planofinanceiro"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Plano Financeiro *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value="2.02.01.21 - Salários / Remunerações - PJ"
-                          disabled
-                          className="bg-muted"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="observacoesaprovacao"
-                  render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Observações da Aprovação</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Digite observações sobre a aprovação ou reprovação"
-                          rows={3}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="observacoesaprovacao"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Observações da Aprovação</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="Digite observações sobre a aprovação ou reprovação"
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Botões de Ação */}
+            {/* Botões de Ação - condicionais por modo */}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="button" variant="default" onClick={handleAprovar} className="bg-green-600 hover:bg-green-700">
-                <Check className="mr-2 h-4 w-4" />
-                Aprovar
-              </Button>
-              <Button type="button" variant="destructive" onClick={handleReprovar}>
-                <X className="mr-2 h-4 w-4" />
-                Reprovar
-              </Button>
+              
+              {modo === 'emissao' ? (
+                <Button type="button" onClick={handleSalvarEdicao}>
+                  Salvar Alterações
+                </Button>
+              ) : (
+                <>
+                  <Button type="button" variant="default" onClick={handleAprovar} className="bg-green-600 hover:bg-green-700">
+                    <Check className="mr-2 h-4 w-4" />
+                    Aprovar
+                  </Button>
+                  <Button type="button" variant="destructive" onClick={handleReprovar}>
+                    <X className="mr-2 h-4 w-4" />
+                    Reprovar
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </Form>
