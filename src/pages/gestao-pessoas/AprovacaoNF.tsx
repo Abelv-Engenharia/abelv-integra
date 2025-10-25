@@ -55,9 +55,6 @@ export default function AprovacaoNF() {
     setEditarModal(true);
   };
 
-  const handleSalvarEdicao = (nfAtualizada: NotaFiscal) => {
-    toast.success("NF atualizada com sucesso!");
-  };
 
   const handleDownload = (nf: NotaFiscal) => {
     if (!nf.arquivourl) {
@@ -297,7 +294,6 @@ export default function AprovacaoNF() {
           open={editarModal}
           onClose={() => setEditarModal(false)}
           notaFiscal={nfSelecionada}
-          onSave={handleSalvarEdicao}
         />
       </div>
   );

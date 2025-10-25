@@ -19,12 +19,12 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUpdateNotaFiscal } from "@/hooks/gestao-pessoas/useNotasFiscais";
 
 interface EditarNFModalProps {
   open: boolean;
   onClose: () => void;
   notaFiscal: NotaFiscal | null;
-  onSave: (data: NotaFiscal) => void;
 }
 
 const formSchema = z.object({
@@ -54,7 +54,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFModalProps) {
+export function EditarNFModal({ open, onClose, notaFiscal }: EditarNFModalProps) {
+  const updateMutation = useUpdateNotaFiscal();
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -142,8 +144,8 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
     // Buscar usuário atual
     const { data: { user } } = await supabase.auth.getUser();
     
-    const updatedNF: NotaFiscal = {
-      ...notaFiscal,
+    updateMutation.mutate({
+      id: notaFiscal.id,
       nomeempresa: formValues.nomeempresa,
       nomerepresentante: formValues.nomerepresentante,
       periodocontabil: formValues.periodocontabil,
@@ -161,11 +163,11 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       status: "Aprovado",
       aprovadopor: user?.email || "Usuário Atual",
       dataaprovacao: new Date().toISOString(),
-      atualizadoem: new Date().toISOString(),
-    };
-
-    onSave(updatedNF);
-    onClose();
+    }, {
+      onSuccess: () => {
+        onClose();
+      }
+    });
   };
 
   const handleReprovar = async () => {
@@ -181,8 +183,8 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
 
     const formValues = form.getValues();
     
-    const updatedNF: NotaFiscal = {
-      ...notaFiscal,
+    updateMutation.mutate({
+      id: notaFiscal.id,
       nomeempresa: formValues.nomeempresa,
       nomerepresentante: formValues.nomerepresentante,
       periodocontabil: formValues.periodocontabil,
@@ -198,11 +200,11 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       statusaprovacao: "Reprovado",
       observacoesaprovacao: observacoes,
       status: "Reprovado",
-      atualizadoem: new Date().toISOString(),
-    };
-
-    onSave(updatedNF);
-    onClose();
+    }, {
+      onSuccess: () => {
+        onClose();
+      }
+    });
   };
 
   const handleDownload = () => {
