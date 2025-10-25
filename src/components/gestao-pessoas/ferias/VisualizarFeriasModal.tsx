@@ -110,15 +110,16 @@ export function VisualizarFeriasModal({ aberto, onFechar, ferias }: VisualizarFe
             </div>
           </div>
 
-          {ferias.observacoes && (
-            <>
-              <Separator />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">Observações</p>
-                <p className="text-sm">{ferias.observacoes}</p>
-              </div>
-            </>
-          )}
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Observações da Solicitação</p>
+            {ferias.observacoes ? (
+              <p className="text-sm">{ferias.observacoes}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Nenhuma observação informada</p>
+            )}
+          </div>
 
           {ferias.status === 'reprovado' && ferias.justificativareprovacao && (
             <>
