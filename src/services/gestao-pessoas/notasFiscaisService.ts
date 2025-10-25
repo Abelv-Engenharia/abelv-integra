@@ -60,7 +60,7 @@ export const notasFiscaisService = {
         valor: data.valor,
         arquivo_url: publicUrl,
         arquivo_nome: data.arquivo.name,
-        status: 'enviado',
+        status: 'aguardando_aprovacao',
         created_by: user.id
       })
       .select()

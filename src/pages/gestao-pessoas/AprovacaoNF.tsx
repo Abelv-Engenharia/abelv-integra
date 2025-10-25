@@ -158,7 +158,7 @@ export default function AprovacaoNF() {
                   <SelectContent>
                     <SelectItem value="Todas">Todas</SelectItem>
                     <SelectItem value="Rascunho">Rascunho</SelectItem>
-                    <SelectItem value="Enviado">Enviado</SelectItem>
+                    <SelectItem value="Aguardando Aprovação">Aguardando Aprovação</SelectItem>
                     <SelectItem value="Aprovado">Aprovado</SelectItem>
                     <SelectItem value="Reprovado">Reprovado</SelectItem>
                     <SelectItem value="Erro">Erro</SelectItem>

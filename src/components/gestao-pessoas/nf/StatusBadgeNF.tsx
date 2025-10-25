@@ -10,7 +10,7 @@ export function StatusBadgeNF({ status }: StatusBadgeNFProps) {
     switch (status) {
       case "Rascunho":
         return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-      case "Enviado":
+      case "Aguardando Aprovação":
         return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       case "Aprovado":
         return "bg-green-500/10 text-green-600 border-green-500/20";

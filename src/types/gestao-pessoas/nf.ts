@@ -24,7 +24,7 @@ export interface NotaFiscal {
   observacoesaprovacao?: string;
   
   // Campos de controle
-  status: "Rascunho" | "Enviado" | "Aprovado" | "Reprovado" | "Erro";
+  status: "Rascunho" | "Aguardando Aprovação" | "Aprovado" | "Reprovado" | "Erro";
   dataenviosienge?: string;
   mensagemerro?: string;
   criadoem: string;

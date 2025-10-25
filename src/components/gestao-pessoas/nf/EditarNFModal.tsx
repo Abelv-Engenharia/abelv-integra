@@ -121,7 +121,7 @@ export function EditarNFModal({ open, onClose, notaFiscal, onSave }: EditarNFMod
       planofinanceiro: data.planofinanceiro,
       statusaprovacao: data.statusaprovacao,
       observacoesaprovacao: data.observacoesaprovacao,
-      status: data.statusaprovacao === "Aprovado" ? "Aprovado" : data.statusaprovacao === "Reprovado" ? "Reprovado" : "Enviado",
+      status: data.statusaprovacao === "Aprovado" ? "Aprovado" : data.statusaprovacao === "Reprovado" ? "Reprovado" : "Aguardando Aprovação",
       atualizadoem: new Date().toLocaleString('pt-BR'),
       ...(data.statusaprovacao !== "Pendente" && {
         aprovadopor: "Usuário Atual",
